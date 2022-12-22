@@ -6,12 +6,12 @@ def tr():
 
 class TestResource(object):
 
-    def dump(self, val = None, label = None):
-        if label:
-            msg = '\n{} =>'.format(label)
-            print(msg)
-        else:
-            print()
-        print(val)
-        print()
+    def dump(self, val = None, label = 'dump()'):
+        fmt = '\n--------\n{label} =>\n{val}'
+        msg = fmt.format(label = label, val = val)
+        print(msg)
+
+    def dumpj(self, val = None, label = 'dump()', indent = 4):
+        val = json.dumps(val, indent = indent)
+        self.dump(val, label)
 

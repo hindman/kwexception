@@ -12,7 +12,16 @@ todos: TODOs
 
 setup.py:
     - classifiers
-    - one more editing pass
+    - decide which Python versions to support
+    - get tox working
+
+README
+
+Final editing pass.
+
+Version bump.
+
+Publish.
 
 --------
 dev-notes: Dev notes

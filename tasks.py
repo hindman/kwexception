@@ -107,19 +107,19 @@ def tox(c):
     '''
     Run tox for the project
     '''
-    d = dict(PYENV_VERSION = '3.9.4:3.8.9:3.7.10:3.6.13:3.5.10')
+    d = dict(PYENV_VERSION = '3.11.1:3.10.9:3.9.4:3.8.9:3.7.10:3.6.13:3.5.10')
     c.run('tox', env = d)
 
-# @task
-# def dist(c, publish = False, test = False):
-#     '''
-#     Create distribution, optionally publishing to pypi or testpypi.
-#     '''
-#     repo = 'testpypi' if test else 'pypi'
-#     c.run('rm -rf dist')
-#     c.run('python setup.py sdist bdist_wheel')
-#     c.run('echo')
-#     c.run('twine check dist/*')
-#     if publish:
-#         c.run(f'twine upload -r {repo} dist/*')
+@task
+def dist(c, publish = False, test = False):
+    '''
+    Create distribution, optionally publishing to pypi or testpypi.
+    '''
+    repo = 'testpypi' if test else 'pypi'
+    c.run('rm -rf dist')
+    c.run('python setup.py sdist bdist_wheel')
+    c.run('echo')
+    c.run('twine check dist/*')
+    if publish:
+        c.run(f'twine upload -r {repo} dist/*')
 

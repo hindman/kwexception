@@ -2,6 +2,18 @@ import pytest
 
 from kwexception import Kwexception, __version__
 
+####
+# Constants and customized Kwexception classes.
+####
+
+MSG = 'blort-blort'
+
+VALUE_ERROR_CONTEXT = {
+    'context_error': 'ValueError',
+    'context_args': (MSG,),
+    'context_str': MSG,
+}
+
 class KwDefault(Kwexception):
     pass
 
@@ -12,20 +24,18 @@ class KwNoNewUpdate(Kwexception):
     NEW_UPDATE = False
     NEW_CONTEXT = False
 
-MSG = 'blort-blort'
+class KwNoSingleDict(Kwexception):
+    SINGLE_DICT = False
 
-VALUE_ERROR_CONTEXT = {
-    'context_error': 'ValueError',
-    'context_args': (MSG,),
-    'context_str': MSG,
-}
+class KwDifferentMessageKey(Kwexception):
+    MSG = 'message'
+    message = Kwexception.msg
 
-def test_version(tr):
-    v = __version__
-    assert v
-    assert isinstance(v, str)
+####
+# Tests for object creation.
+####
 
-def test_default_construct(tr):
+def test_construct_default(tr):
     kws = dict(a = 1, b = 2)
     exp = dict(msg = MSG, **kws)
     e = KwDefault(MSG, **kws)
@@ -36,6 +46,34 @@ def test_default_construct(tr):
     assert repr(e) == f'KwDefault({repr(exp)})'
     assert isinstance(e, KwDefault)
     assert isinstance(e, Kwexception)
+
+def test_construct_just_dict(tr):
+    kws = dict(msg = MSG, a = 1, b = 2)
+
+    e = KwDefault(kws)
+    assert e.args == (kws,)
+    assert e.params == kws
+    assert e.msg == MSG
+
+    kws = dict(a = 1, b = 2)
+    exp_params = {'msg': kws}
+    e = KwNoSingleDict(kws)
+    assert e.msg == kws
+    assert e.params == exp_params
+    assert e.args == (exp_params,)
+
+def test_construct_simple(tr):
+    e = KwDefault(MSG)
+    exp_params = {'msg': MSG}
+    assert e.params == exp_params
+    assert e.args == (exp_params,)
+    assert e.msg == MSG
+    assert str(e) == MSG
+    assert repr(e) == f'KwDefault({MSG!r})'
+
+####
+# Tests for Kwexception.new().
+####
 
 def test_default_new(tr):
     kws = dict(a = 1, b = 2)
@@ -78,3 +116,24 @@ def test_new_no_update(tr):
     assert isinstance(e2, KwNoNewUpdate)
     assert e2.params == extra
 
+####
+# Other tests.
+####
+
+def test_version(tr):
+    v = __version__
+    assert v
+    assert isinstance(v, str)
+
+def test_different_message_name(tr):
+    kws = dict(a = 1, b = 2)
+    exp = dict(message = MSG, **kws)
+    e = KwDifferentMessageKey(MSG, **kws)
+
+    assert e.args == (exp,)
+    assert e.params == exp
+    assert e.msg == MSG
+    assert str(e) == str(exp)
+    assert repr(e) == f'KwDifferentMessageKey({repr(exp)})'
+    assert isinstance(e, KwDifferentMessageKey)
+    assert isinstance(e, Kwexception)

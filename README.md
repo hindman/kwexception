@@ -2,6 +2,21 @@
 
 #### Motivation
 
+Blah blah blah. Blah blah blah. Blah blah blah. Blah blah blah. Blah blah blah.
+Blah blah blah. Blah blah blah.
+
+```python
+for x in xs:
+    print(x)
+```
+
+#### An easier way
+
+Blah blah blah. Blah blah blah. Blah blah blah. Blah blah blah. Blah blah blah.
+Blah blah blah. Blah blah blah.
+
+#### Examples
+
 The purposes of Kwexception.new():
 
     - Convert another error type to the error-type known by your project.
@@ -27,15 +42,37 @@ Is STRINGIFY really needed? Defer for now.
     But this could be added later without changing anything else.
 
 
-```python
-for x in xs:
-    print(x)
-```
+raise ValueError(f"Cannot convert value to bool: {val}")
 
-#### An easier way
+raise UnannotatedAttributeError(
+    "The following `attr.ib`s lack a type annotation: "
+    + ", ".join(
+        sorted(unannotated, key=lambda n: cd.get(n).counter)
+    )
+    + "."
+)
 
-Blah blah blah. Blah blah blah. Blah blah blah. Blah blah blah. Blah blah blah.
-Blah blah blah. Blah blah blah.
+raise ValueError(f"No mandatory attributes allowed after an attribute with a default value or factory.  Attribute in question: {a!r}")
+
+raise AttrsAttributeNotFoundError(f"{k} is not an attrs attribute on {new.__class__}.")
+
+raise TypeError(
+    "'{name}' must be {type!r} (got {value!r} that is a "
+    "{actual!r}).".format(
+        name=attr.name,
+        type=self.type,
+        actual=value.__class__,
+        value=value,
+    ),
+    attr,
+    self.type,
+    value,
+)
+
+# Django
+raise ValidationError(self.message, code=self.code, params={"value": value})
+raise ValueError("The protocol '%s' is unknown. Supported: %s" % (protocol, list(ip_address_validator_map)))
+raise TypeError("Page indices must be integers or slices, not %s." % type(index).__name__)
 
 ----
 

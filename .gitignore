@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+/__pycache__/
+*.py[cod]
+
+# Development-related files.
+/.ackrc
+/.vimrc
+/.noseids
+/tags
+
+# Building, distribution, packaging.
+/dist/
+/build/
+/*.egg-info
+/src/*.egg-info
+
+# Temp and similar directories.
+/tmp/
+
+# Unit test and coverage reports.
+/htmlcov/
+/.tox/
+/.pytest_cache/
+/.coverage
+
+# Junk files.
+.DS_Store
+

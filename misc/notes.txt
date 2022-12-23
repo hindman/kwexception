@@ -10,7 +10,7 @@ toc: Table of contents
 todos: TODOs
 --------
 
-README
+README.md
 
 Final editing pass.
 

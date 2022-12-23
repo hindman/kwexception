@@ -2,18 +2,139 @@
 
 #### Motivation
 
-Blah blah blah. Blah blah blah. Blah blah blah. Blah blah blah. Blah blah blah.
-Blah blah blah. Blah blah blah.
+Most Python exceptions consist of error type (`ValueError`, `TypeError`, etc.)
+and a message that attempts to communicate the problem. In many cases, that
+message must contain one or more data values to provide context. In simple
+cases, exceptions created in the classic style are not too bad.
+
+    raise ValueError(f'Cannot convert value to float: {val!r}')
+
+But when the data needed to create a clear exception message expands to to
+multiple or more complex values, the process becomes both tedious and
+ill-conceived. Tedious because the programmer must engage in a variety of ad
+hoc string-formatting maneuvers. Ill-conceived because something explicit and
+useful to programmers (data) is wedged into a human-readable message, making
+the data less immediately accessible (for example, quick copying into an editor
+or REPL) and less explicit (sometimes important details are lost in
+stringification).
+
+Similar problems exist in even more pressing forms in the domain of logging.
+The classic approach was to emit logging messages in the manner described
+above: take a human-readable message and then awkwardly wedge data values into
+it. The end result is a logging message that is typically only
+partially-parsable unless the developers on the project exercise unusually high
+levels of discipline in their creation of logging messages. Seeking a better
+approach, many software engineers have switched to JSON-based logging. Under
+that approach, the human-readable text is just a short message stating the
+problem in general terms, and that message is just one key-value pair in a dict
+that contains all other data parameters needed to make the logging entry
+specific and meaningful (both general data values like date, time, and logging
+level, as well any a variety of specific data values appropriate to the case at
+hand).
+
+Python exceptions are amendable to similar improvements -- hence the
+kwexception library. Instead of starting with a message and wedging data into
+it, the developer simply creates an exception via keyword parameters.
+
+#### Basic usage
+
+The first step is to define one or more exception classes for your project.
+If you are satisfied with the library's default behavior, they simply
+need to inherit from `Kwexception`:
 
 ```python
-for x in xs:
-    print(x)
+from kwexception import Kwexception
+
+class PointError(Kwexception):
+    pass
 ```
 
-#### An easier way
+To create exceptions, pass both the textual message and any other keyword
+parameters needed to make the error useful. By default, the message is stored
+under the `msg` keyword parameter. When creating exceptions you can pass the
+message explicitly under that key or as the first positional parameter. At
+least under default settings, the resulting exception is the same.
 
-Blah blah blah. Blah blah blah. Blah blah blah. Blah blah blah. Blah blah blah.
-Blah blah blah. Blah blah blah.
+```python
+INVALID = 'Invalid Point coordinates'
+x = 11
+y = 0
+
+e = PointError(msg = INVALID, x = x, y = y)  # Pass msg explicitly.
+e = PointError(INVALID, x = x, y = y)        # Or as the first positional.
+```
+
+The exception's data will be accessible via its `params` and `msg` attributes:
+
+```python
+print(e.msg)     # Invalid Point coordinates
+print(e.params)  # {'msg': 'Invalid Point coordinates', 'x': 11, 'y': 0}
+```
+
+When the exception is stringified, its data will be presented faithfully as a
+dict:
+
+```python
+# Represetation via str():
+
+{'msg': 'Invalid Point coordinates', 'x': 11, 'y': 0}
+
+# Represetation via repr():
+
+PointError({'msg': 'Invalid Point coordinates', 'x': 11, 'y': 0})
+
+# Represetation in a stacktrace:
+
+PointError: {'msg': 'Invalid Point coordinates', 'x': 11, 'y': 0}
+```
+
+Upon first exposure to such output one might balk at the aesthetics of the
+stringified dict when compared to a classic exception with just a
+human-readable message. But stacktraces and exception stringification generally
+are the domain of software engineers, not end users, so those aesthetics
+concerns are misplaced (if your end-users are seeing your stacktraces, your
+project has bigger problems). For Python programmers, there is nothing
+mysterious about a dict; they are eminently clear and practical.
+
+#### Details and customization
+
+The underlying data model for an exception is a tuple, accessible via the
+`args` attribute.
+
+```python
+e1 = ValueError('Boom')
+e1.args                          # ('Boom',)
+
+e2 = ValueError('Boom', 1, 2)
+e2.args                          # ('Boom', 1, 2)
+```
+
+During creation, a Kwexception subclass ends up having the keyword parameters
+dict as an element in that `args` tuple.
+
+    ...
+
+Although the `args` tuple can hold multiple values, in the vast majority of
+cases, Python exceptions contain a single argument (the hand-crafted,
+data-bearing message). In those cases, the stringified exception is simplified
+to show only the first element of the tuple.
+
+```python
+e = ValueError('Boom')
+print(e.args)                   # ('Boom',)
+print(str(e))                   # Boom
+print(repr(e))                  # ValueError('Boom')
+
+e = ValueError('Boom', 1, 2)
+print(e.args)                   # ('Boom', 1, 2)
+print(str(e))                   # ('Boom', 1, 2)
+print(repr(e))                  # ValueError('Boom', 1, 2)
+```
+
+The Kwexception library provides the same simplification when its instances
+are stringified.
+
+    ...
 
 #### Examples
 

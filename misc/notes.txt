@@ -10,12 +10,6 @@ toc: Table of contents
 todos: TODOs
 --------
 
-setup.py:
-
-    - classifiers
-        - Python versions to support: 3.5 - 3.11
-        - See https://pypi.org/classifiers/
-
 README
 
 Final editing pass.

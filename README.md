@@ -14,32 +14,44 @@ multiple or more complex values, the process becomes both tedious and
 ill-conceived. Tedious because the programmer must engage in a variety of ad
 hoc string-formatting maneuvers. Ill-conceived because something explicit and
 useful to programmers (data) is wedged into a human-readable message, making
-the data less immediately accessible (for example, quick copying into an editor
-or REPL) and less explicit (sometimes important details are lost in
-stringification).
+the data less immediately accessible (for example, quickly copying into an
+editor or REPL) and less explicit (sometimes important details are lost in
+stringification). Here's a lightly-edited example taken from a widely used
+Python library illustrating how the typical approach to exceptions can quickly
+lead to tedious string-building gynastics:
+
+    raise TypeError(
+        "'{name}' must be {type!r} (got {value!r} that is a "
+        "{actual!r}).".format(
+            name = name,
+            type = self.type,
+            actual = value.__class__,
+            value = value,
+        ),
+    )
 
 Similar problems exist in even more pressing forms in the domain of logging.
 The classic approach was to emit logging messages in the manner described
-above: take a human-readable message and then awkwardly wedge data values into
+above: take a human-readable message and then awkwardly insert data values into
 it. The end result is a logging message that is typically only
 partially-parsable unless the developers on the project exercise unusually high
 levels of discipline in their creation of logging messages. Seeking a better
-approach, many software engineers have switched to JSON-based logging. Under
+alternative, many software engineers have switched to JSON-based logging. Under
 that approach, the human-readable text is just a short message stating the
 problem in general terms, and that message is just one key-value pair in a dict
 that contains all other data parameters needed to make the logging entry
-specific and meaningful (both general data values like date, time, and logging
-level, as well any a variety of specific data values appropriate to the case at
-hand).
+specific and meaningful (not only general data values like date, time, and
+logging level but also a variety of specific data values appropriate to the
+case at hand).
 
 Python exceptions are amendable to similar improvements -- hence the
-kwexception library. Instead of starting with a message and wedging data into
+kwexception library. Instead of starting with a message and shoving data into
 it, the developer simply creates an exception via keyword parameters.
 
 #### Basic usage
 
-The first step is to define one or more exception classes for your project.
-If you are satisfied with the library's default behavior, they simply
+The first step is to define one or more exception classes for your project. If
+you are satisfied with the library's default behavior, those classes simply
 need to inherit from `Kwexception`:
 
 ```python
@@ -52,8 +64,7 @@ class PointError(Kwexception):
 To create exceptions, pass both the textual message and any other keyword
 parameters needed to make the error useful. By default, the message is stored
 under the `msg` keyword parameter. When creating exceptions you can pass the
-message explicitly under that key or as the first positional parameter. At
-least under default settings, the resulting exception is the same.
+message explicitly under that key or as the first positional parameter.
 
 ```python
 INVALID = 'Invalid Point coordinates'
@@ -75,30 +86,30 @@ When the exception is stringified, its data will be presented faithfully as a
 dict:
 
 ```python
-# Represetation via str():
+# Representation via str().
 
 {'msg': 'Invalid Point coordinates', 'x': 11, 'y': 0}
 
-# Represetation via repr():
+# Representation via repr().
 
 PointError({'msg': 'Invalid Point coordinates', 'x': 11, 'y': 0})
 
-# Represetation in a stacktrace:
+# Representation in a stacktrace.
 
 PointError: {'msg': 'Invalid Point coordinates', 'x': 11, 'y': 0}
 ```
 
 Upon first exposure to such output one might balk at the aesthetics of the
 stringified dict when compared to a classic exception with just a
-human-readable message. But stacktraces and exception stringification generally
-are the domain of software engineers, not end users, so those aesthetics
-concerns are misplaced (if your end-users are seeing your stacktraces, your
-project has bigger problems). For Python programmers, there is nothing
-mysterious about a dict; they are eminently clear and practical.
+human-readable message. But stacktraces -- and exception stringification
+generally -- are the domain of software engineers, not end users, so those
+aesthetics concerns are misplaced (if your end-users are seeing your
+stacktraces, your project has bigger problems). For Python programmers, there
+is nothing mysterious about a dict; they are eminently clear and practical.
 
-#### Details and customization
+#### Details
 
-The underlying data model for an exception is a tuple, accessible via the
+The underlying data model for a Python exception is a tuple, accessible via the
 `args` attribute.
 
 ```python
@@ -135,6 +146,8 @@ The Kwexception library provides the same simplification when its instances
 are stringified.
 
     ...
+
+#### Details and customization
 
 #### Examples
 
@@ -176,19 +189,6 @@ raise UnannotatedAttributeError(
 raise ValueError(f"No mandatory attributes allowed after an attribute with a default value or factory.  Attribute in question: {a!r}")
 
 raise AttrsAttributeNotFoundError(f"{k} is not an attrs attribute on {new.__class__}.")
-
-raise TypeError(
-    "'{name}' must be {type!r} (got {value!r} that is a "
-    "{actual!r}).".format(
-        name=attr.name,
-        type=self.type,
-        actual=value.__class__,
-        value=value,
-    ),
-    attr,
-    self.type,
-    value,
-)
 
 # Django
 raise ValidationError(self.message, code=self.code, params={"value": value})

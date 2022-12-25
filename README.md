@@ -7,7 +7,9 @@ etc.) and a message that attempts to communicate the problem. In many cases,
 that message must contain one or more data values to provide context. In simple
 cases, exceptions created in the classic style are not too bad.
 
-    raise ValueError(f'Cannot convert value to float: {val!r}')
+```python
+raise ValueError(f'Cannot convert value to float: {val!r}')
+```
 
 But when the data needed to create a clear exception message expands to to
 multiple or more complex values, the process becomes both tedious and
@@ -20,15 +22,17 @@ stringification). Here's a lightly-edited example taken from a widely used
 Python library illustrating how the typical approach to exceptions can quickly
 lead to tedious string-building gynastics:
 
-    raise TypeError(
-        "'{name}' must be {type!r} (got {value!r} that is a "
-        "{actual!r}).".format(
-            name = name,
-            type = self.type,
-            actual = value.__class__,
-            value = value,
-        ),
-    )
+```python
+raise TypeError(
+    "'{name}' must be {type!r} (got {value!r} that is a "
+    "{actual!r}).".format(
+        name = name,
+        type = self.type,
+        actual = value.__class__,
+        value = value,
+    ),
+)
+```
 
 Similar problems have long existed in even more pressing forms in the domain of
 logging. The classic approach was to emit logging messages in the manner
@@ -90,16 +94,13 @@ When the exception is stringified, its data will be presented faithfully as a
 dict:
 
 ```python
-# Representation via str().
-
+# str() representation.
 {'msg': 'Invalid Point coordinates', 'x': 11, 'y': None}
 
-# Representation via repr().
-
+# repr() representation.
 PointError({'msg': 'Invalid Point coordinates', 'x': 11, 'y': None})
 
-# Representation in a stacktrace.
-
+# Stacktrace representation.
 PointError: {'msg': 'Invalid Point coordinates', 'x': 11, 'y': None}
 ```
 
@@ -119,13 +120,13 @@ tuple, accessible via the `args` attribute.
 
 ```python
 ve1 = ValueError('Boom')
-ve1.args                          # ('Boom',)
+ve1.args                        # ('Boom',)
 
 ve2 = ValueError('Boom', 1, 2)
-ve2.args                          # ('Boom', 1, 2)
+ve2.args                        # ('Boom', 1, 2)
 ```
 
-A Kwexception subclass rests on that behavior, with the dict of keyword
+A `Kwexception` subclass rests on that behavior, with the dict of keyword
 parameters typically being the sole element in the `args` tuple. For example,
 the PointError shown above would have the following tuple:
 
@@ -139,11 +140,11 @@ simplified form. One can see this by comparing the two ValueError instances
 shown above:
 
 ```python
-print(str(ve1))     # Boom
-print(str(ve2))     # ('Boom', 1, 2)
+print(str(ve1))  # Boom
+print(str(ve2))  # ('Boom', 1, 2)
 ```
 
-The Kwexception library provides an analogous simplification when its instances
+The `Kwexception` library provides an analogous simplification when its instances
 are stringified. If the instance has only a `msg` in its keyword parameters and
 if its `args` tuple consists of nothing but the dict of those parameters, the
 exception will be displayed in simple form.
@@ -153,19 +154,19 @@ e1 = PointError('Foo', x = 11, y = None)
 e2 = PointError('Foo')
 e3 = PointError(msg = 'Foo')
 
-print(str(e1))  # {'msg': 'Foo', 'x': 11, 'y': None}
-print(repr(e1)) # PointError({'msg': 'Foo', 'x': 11, 'y': None})
+print(str(e1))   # {'msg': 'Foo', 'x': 11, 'y': None}
+print(repr(e1))  # PointError({'msg': 'Foo', 'x': 11, 'y': None})
 
-print(str(e2))  # Foo
-print(repr(e2)) # PointError('Foo')
+print(str(e2))   # Foo
+print(repr(e2))  # PointError('Foo')
 
-print(str(e3))  # Foo
-print(repr(e3)) # PointError('Foo')
+print(str(e3))   # Foo
+print(repr(e3))  # PointError('Foo')
 ```
 
 #### Additional feature: exception handling and augmentation
 
-The Kwexception class provides one other primary feature: the ability to handle
+The `Kwexception` class provides one other primary feature: the ability to handle
 other exceptions in an easier, more consistent way. This behavior is provided
 via the class method `new()`, which takes an exception as its first argument
 and optionally takes any other keyword parameters. Its primary intended usage
@@ -183,7 +184,7 @@ except Exception as e:
 ```
 
 If the exception provided to `Kwexception.new()` is already an instance
-of a sublcass of Kwexception, the method returns the same exception, but
+of a sublcass of `Kwexception`, the method returns the same exception, but
 updates its `params` dict with the keyword parameters supplied to `new()`.
 
 ```python
@@ -195,7 +196,7 @@ print(repr(e2))  # PointError({'msg': 'foo', 'a': 111, 'b': 2, 'c': 3})
 ```
 
 If the provided exception is some other type of error, the `new()` method
-returns a new Kwexception instance with the provided keyword parameters, plus
+returns a new `Kwexception` instance with the provided keyword parameters, plus
 additional parameters providing contextual information about the original
 exception's type and `args`.
 
@@ -203,12 +204,13 @@ exception's type and `args`.
 ve1 = ValueError('foo', 99)
 e3 = PointError.new(ve1, msg = 'bar', x = 1)
 
-print(repr(e3)) # PointError({'msg': 'bar', 'x': 1, 'context_error': 'ValueError', 'context_args': ('foo', 99)})
+print(repr(e3)) # PointError({'msg': 'bar', 'x': 1,
+                # 'context_error': 'ValueError', 'context_args': ('foo', 99)})
 ```
 
 #### Customization
 
-A Kwexception superclass offers a few customizations for users who want some,
+A `Kwexception` superclass offers a few customizations for users who want some,
 but not all, of its default behaviors. This example lists the default settings:
 
 ```python
@@ -234,24 +236,24 @@ move operation can be a copy operation, or disabled entirely.
 **Adding the dict of keyword parameters to the `args` tuple:
 `ADD_PARAMS_TO_ARGS`**. By default, the dict of keyword parameters is appended
 to the exception's `args` tuple (this occurs after the move/copy for `SET_MSG`).
-If a Kwexception subclass wants to take advantage of keyword parameters but
+If a `Kwexception` subclass wants to take advantage of keyword parameters but
 also needs the `args` tuple for other purposes, this behavior can be disabled.
 
 **Accept keyword parameters via a positional dict: `SINGLE_DICT_AS_PARAMS`**.
-By default, a Kwexception instance is stringified for `repr()` by showing the
+By default, a `Kwexception` instance is stringified for `repr()` by showing the
 dict of keyword parameters. For consistency with that representation, if the
 constructor is given only a dict positionally (i.e., no other positional or
 keyword arguments), it will treat that dict as the exception's keyword
 parameters and store them in `params` accordingly.
 
 **Simplified display for message-only exceptions: `SIMPLIFY_DISPLAY`**. As
-documented above, by default a Kwexception instance containing no data other
+documented above, by default a `Kwexception` instance containing no data other
 than a `msg` will stringify in a simplified way. If the behavior is disabled,
 stringification will be based on the content of `args` using default Python
 behavior.
 
 **New exceptions from original exceptions: augment keyword parameters via
-update or setdefault: `NEW_UPDATE`**. When given an instance of Kwexception,
+update or setdefault: `NEW_UPDATE`**. When given an instance of `Kwexception`,
 the classmethod `new()` uses the keyword parameters to augment the original
 exception's `params` dict in the manner of `dict.update()`. If `NEW_UPDATE` is
 set to false, the `params` dict is augmented in the manner of
@@ -259,17 +261,17 @@ set to false, the `params` dict is augmented in the manner of
 
 **New exceptions from original exceptions: whether to convert exceptions and
 add contextual information about the original: `NEW_CONVERT` and
-`NEW_CONTEXT`**. When given an instance of a non-Kwexception type, the
-classmethod `new()` returns a new exception of the relevant Kwexception
+`NEW_CONTEXT`**. When given an instance of a non-`Kwexception` type, the
+classmethod `new()` returns a new exception of the relevant `Kwexception`
 subclass and it includes contextual information in the `params` dict about the
 original error. Alternatively, one can suppress the inclusion of contextual
 information or the entire conversion process.
 
-**Controlling the key name for the exception message: `MSG`**. The Kwexception
+**Controlling the key name for the exception message: `MSG`**. The `Kwexception`
 instance's message is stored under the `msg` key. To use a different naming
 convention, set `MSG` to a different value and define an alias for the
 `Kwexception.msg()` property. Here is an illustration for those preferring a
-more verbose but exclicit approach:
+more verbose but explicit approach:
 
 ```python
 class PointError(Kwexception):

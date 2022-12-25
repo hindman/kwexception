@@ -11,7 +11,7 @@ import sys
 project_name = 'kwexception'
 package_name = project_name.replace('-', '_')
 repo_name    = project_name
-description  = 'Richer exceptions with keyword parameters'
+description  = 'Better exceptions with keyword parameters'
 url          = 'https://github.com/hindman/' + repo_name
 author       = 'Monty Hindman'
 author_email = 'mhindman@gmail.com'

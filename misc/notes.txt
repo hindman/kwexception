@@ -10,7 +10,13 @@ toc: Table of contents
 todos: TODOs
 --------
 
-README.md
+Add a DEFAULT_MSG attribute.
+
+    - Just a string. It's the default msg.
+
+    - A dict. When the user passes msg, they should use dict keys.
+
+README.md: revisit.
 
 Final editing pass.
 

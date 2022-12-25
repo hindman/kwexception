@@ -11,7 +11,6 @@ MSG = 'blort-blort'
 VALUE_ERROR_CONTEXT = {
     'context_error': 'ValueError',
     'context_args': (MSG,),
-    'context_str': MSG,
 }
 
 class KwDefault(Kwexception):
@@ -25,7 +24,7 @@ class KwNoNewUpdate(Kwexception):
     NEW_CONTEXT = False
 
 class KwNoSingleDict(Kwexception):
-    SINGLE_DICT = False
+    SINGLE_DICT_AS_PARAMS = False
 
 class KwDifferentMessageKey(Kwexception):
     MSG = 'message'

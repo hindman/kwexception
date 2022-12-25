@@ -1,52 +1,32 @@
 
 class Kwexception(Exception):
     '''
-    Richer exceptions with keyword parameters.
+    Better exceptions with keyword parameters.
     '''
 
-    # Key name for the Kwexception message in self.params. To customize this
-    # name, the subclass should set a value for MSG and also define an alias
-    # for Kwexception.msg. For example, to change 'msg' to 'message' configure
-    # the subclass with: MSG = 'message'; message = Kwexception.msg.
+    # Key name for the Kwexception message in self.params.
     MSG = 'msg'
 
-    # Customize object creation: if SET_MSG is Kwexception.MOVE or
-    # Kwexception.COPY, the constructor's first positional argument will be
-    # moved or copied into the self.params under the MSG key.
+    # Whether and how to set msg from the first positional.
     MOVE = 'move'
     COPY = 'copy'
     SET_MSG = MOVE
 
-    # Customize object creation: if SUPER_PARAMS is True, the self.params dict
-    # will be appended to the tuple passed to the super().__init__() call.
-    SUPER_PARAMS = True
+    # Whether to add params to args.
+    ADD_PARAMS_TO_ARGS = True
 
-    # Customize object creation. If SINGLE_DICT is True, one can create a
-    # Kwexception by passing a single dict positionally. That dict will be
-    # treated as self.params. This behavior is consistent with the default
-    # repr() output for Kwexception instances.
-    SINGLE_DICT = True
+    # Whether to treat a single positional dict as the keyword params.
+    SINGLE_DICT_AS_PARAMS = True
 
-    # Customize str() and repr() for Kwexception instances. If SIMPLIFY_DISPLAY
-    # is True, Kwexception instances having nothing more than a message will be
-    # stringified like basic Python exceptions.
+    # Whether to simplify stringification for message-only exceptions.
     SIMPLIFY_DISPLAY = True
 
-    # Customize Kwexception.new() in cases where the method receives an error
-    # whose type is a Kwexception subclass. If NEW_UPDATE is True, the keyword
-    # arguments passed to new() will be applied to self.params in the manner
-    # of dict.update(). If NEW_UPDATE is False, they will be applied in the
-    # manner of dict.setdefault().
+    # Whether new() should use update or setdefault when augmenting params.
     NEW_UPDATE = True
 
-    # Customize Kwexception.new() in cases where the method receives an error
-    # whose type is not a Kwexception subclass. If NEW_CONVERT is True, the
-    # method will return a new instance of the relevant Kwexception subclass
-    # (cls); if NEW_CONVERT is False, the method will simply return the
-    # original exception unchanged. In the True case, and if NEW_CONTEXT is
-    # also True, the new instance of cls will have contextual information about
-    # the original error added to self.params (its class name, its self.args,
-    # and its str() representation).
+    # Whether new() should convert errors of another type to the relevant
+    # Kwexception subclass and, if so, whether to include contexutal
+    # information in params.
     NEW_CONVERT = True
     NEW_CONTEXT = True
 
@@ -55,7 +35,7 @@ class Kwexception(Exception):
         # To remain faithful to repr(), if the constructor receives
         # only a dict positionally, treat it as the params.
         xs_is_params = (
-            self.SINGLE_DICT and
+            self.SINGLE_DICT_AS_PARAMS and
             len(xs) == 1 and
             isinstance(xs[0], dict) and
             not kws
@@ -78,7 +58,7 @@ class Kwexception(Exception):
                 xs = xs[1:]
 
         # Add kws to xs so that it will be included in the super() call.
-        if self.SUPER_PARAMS:
+        if self.ADD_PARAMS_TO_ARGS:
             xs = xs + (kws,)
 
         # Set params and make the super() call.
@@ -113,7 +93,6 @@ class Kwexception(Exception):
             kws.update(
                 context_error = type(e).__name__,
                 context_args = e.args,
-                context_str = str(e),
             )
         return cls(**kws)
 

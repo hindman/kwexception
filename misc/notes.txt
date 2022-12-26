@@ -10,11 +10,66 @@ toc: Table of contents
 todos: TODOs
 --------
 
-Add a DEFAULT_MSG attribute.
+Add a DEFAULT_MSG and FORMATS attributes.
 
-    - Just a string. It's the default msg.
+    - Evaluation:
 
-    - A dict. When the user passes msg, they should use dict keys.
+        DEFAULT_MSG makes sense
+
+        FORMATS pushes against the whole point of the library.
+
+            - Alternatively, one could say that it offers a way to retain the
+              best of the library's separation of concerns (text vs data) with
+              a traditionalist need for a regular exception message containing
+              the data.
+
+    - When user creates Kwexception, we get the msg value.
+
+        if msg value is present among the arguments/parameters:
+            if msg in FORMATS:
+                msg = FORMATS[msg].format(**params)
+            else:
+                msg = msg
+        else:
+            if DEFAULT_MSG is None:
+                Don't set a msg
+            else:
+                msg = DEFAULT_MSG
+
+    - Usage illustration:
+
+        class FooError(Kwexception):
+
+            # Using a dict.
+            FORMATS = {
+                err1 = '...',
+                err2 = '...',
+            }
+
+            # Using short-con.
+            FORMATS = cons('FooErrorFormats',
+                err1 = '...',
+                err2 = '...',
+            }
+
+        from .errors import FooError
+
+        FMTS = FooError.FORMATS
+
+        e = FooError(FMTS['err1'], a = 1, b = 2)
+        e = FooError(FMTS.err1, a = 1, b = 2)
+
+    - str.format() notes:
+
+        You can pass unneeded kw-params to the call.
+        If you omit a format-declared param, you get a key error.
+
+        Similar with positionals. You can pass extra args, but if you pass too
+        few you get an IndexError.
+
+        With functions you can define their args kw-style or positionally,
+        and the function call will work with args passed in either style.
+        Format strings do not behave similarly; they are strict.
 
 README.md: revisit.
 

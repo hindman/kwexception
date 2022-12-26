@@ -5,7 +5,10 @@ class Kwexception(Exception):
     '''
 
     # Key name for the Kwexception message in self.params.
-    MSG = 'msg'
+    MSG_KEY = 'msg'
+
+    # Specify a default msg for instances of the class.
+    DEFAULT_MSG = None
 
     # Whether and how to set msg from the first positional.
     MOVE = 'move'
@@ -30,8 +33,12 @@ class Kwexception(Exception):
     NEW_CONVERT = True
     NEW_CONTEXT = True
 
-    def __init__(self, *xs, **kws):
+    # Whether to use the msg as format string or as a lookup
+    # into a FORMATS dict of format strings.
+    FORMAT_MSG = False
+    FORMATS = None
 
+    def __init__(self, *xs, **kws):
         # To remain faithful to repr(), if the constructor receives
         # only a dict positionally, treat it as the params.
         xs_is_params = (
@@ -48,14 +55,31 @@ class Kwexception(Exception):
         should_set_msg = (
             self.SET_MSG in (self.MOVE, self.COPY) and
             xs and
-            self.MSG not in kws
+            self.MSG_KEY not in kws
         )
         if should_set_msg:
-            d = {self.MSG: xs[0]}
+            d = {self.MSG_KEY: xs[0]}
             d.update(kws)
             kws = d
             if self.SET_MSG == self.MOVE:
                 xs = xs[1:]
+
+        # Set a default msg.
+        if self.DEFAULT_MSG is not None and self.MSG_KEY not in kws:
+            d = {self.MSG_KEY: self.DEFAULT_MSG}
+            d.update(kws)
+            kws = d
+
+        # Format the msg. If msg is a str (neither None nor an unusual value
+        # from user), first set fmt, either directly from msg or via FORMATS
+        # (where msg is key). Then set the msg in kws via a format() call.
+        msg = kws.get(self.MSG_KEY, None)
+        if self.FORMAT_MSG and isinstance(msg, str):
+            if self.FORMATS is None:
+                fmt = msg
+            else:
+                fmt = self.FORMATS.get(msg, msg)
+            kws[self.MSG_KEY] = fmt.format(**kws)
 
         # Add kws to xs so that it will be included in the super() call.
         if self.ADD_PARAMS_TO_ARGS:
@@ -67,7 +91,7 @@ class Kwexception(Exception):
 
     @property
     def msg(self):
-        return self.params.get(self.MSG, None)
+        return self.params.get(self.MSG_KEY, None)
 
     @classmethod
     def new(cls, e, **kws):
@@ -98,7 +122,7 @@ class Kwexception(Exception):
 
     def __str__(self):
         if self._use_simplified_display:
-            return self.msg
+            return str(self.msg)
         else:
             return super().__str__()
 
@@ -120,6 +144,6 @@ class Kwexception(Exception):
             len(self.args) == 1 and
             self.args[0] == self.params and
             len(self.params) == 1 and
-            self.MSG in self.params
+            self.MSG_KEY in self.params
         )
 

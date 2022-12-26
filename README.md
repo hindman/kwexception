@@ -267,16 +267,16 @@ subclass and it includes contextual information in the `params` dict about the
 original error. Alternatively, one can suppress the inclusion of contextual
 information or the entire conversion process.
 
-**Controlling the key name for the exception message: `MSG`**. The `Kwexception`
-instance's message is stored under the `msg` key. To use a different naming
-convention, set `MSG` to a different value and define an alias for the
-`Kwexception.msg()` property. Here is an illustration for those preferring a
-more verbose but explicit approach:
+**Controlling the key name for the exception message: `MSG_KEY`**. The
+`Kwexception` instance's message is stored under the `msg` key. To use a
+different naming convention, set `MSG_KEY` to a different value and define an
+alias for the `Kwexception.msg()` property. Here is an illustration for those
+preferring a more verbose but explicit approach:
 
 ```python
 class PointError(Kwexception):
 
-    MSG = 'message'
+    MSG_KEY = 'message'
     message = Kwexception.msg
 ```
 

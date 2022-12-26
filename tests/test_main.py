@@ -7,6 +7,7 @@ from kwexception import Kwexception, __version__
 ####
 
 MSG = 'blort-blort'
+SUFFIX = '-default'
 
 VALUE_ERROR_CONTEXT = {
     'context_error': 'ValueError',
@@ -27,8 +28,11 @@ class KwNoSingleDict(Kwexception):
     SINGLE_DICT_AS_PARAMS = False
 
 class KwDifferentMessageKey(Kwexception):
-    MSG = 'message'
+    MSG_KEY = 'message'
     message = Kwexception.msg
+
+class KwDefaultMessage(Kwexception):
+    DEFAULT_MSG = MSG + SUFFIX
 
 ####
 # Tests for object creation.
@@ -41,6 +45,7 @@ def test_construct_default(tr):
     assert e.args == (exp,)
     assert e.params == exp
     assert e.msg == MSG
+    assert tuple(e.params)[0] == 'msg'
     assert str(e) == str(exp)
     assert repr(e) == f'KwDefault({repr(exp)})'
     assert isinstance(e, KwDefault)
@@ -69,6 +74,35 @@ def test_construct_simple(tr):
     assert e.msg == MSG
     assert str(e) == MSG
     assert repr(e) == f'KwDefault({MSG!r})'
+
+def test_construct_default_msg(tr):
+
+    # A helper to check a KwDefaultMessage instance.
+    def check(e, exp_msg, exp_params):
+        # Params, msg, and args.
+        assert e.params == exp_params
+        assert e.args == (exp_params,)
+        assert e.msg == exp_msg
+        # In params, msg is first key.
+        assert tuple(e.params)[0] == 'msg'
+        # Stringification.
+        assert str(e) == str(exp_params)
+        assert repr(e) == f'KwDefaultMessage({exp_params!r})'
+
+    # Some params and the default msg of the subclass.
+    kws = dict(a = 1, b = 2)
+    def_msg = KwDefaultMessage.DEFAULT_MSG
+
+    # If you don't pass any msg args/params, you'll get default.
+    e = KwDefaultMessage(**kws)
+    check(e, def_msg, {'msg': def_msg, **kws})
+
+    # If you pass msg explicitly or positionally, you'll get it rather than default.
+    exp = {'msg': MSG, **kws}
+    e1 = KwDefaultMessage(msg = MSG, **kws)
+    e2 = KwDefaultMessage(MSG, **kws)
+    check(e1, MSG, exp)
+    check(e2, MSG, exp)
 
 ####
 # Tests for Kwexception.new().
@@ -136,3 +170,4 @@ def test_different_message_name(tr):
     assert repr(e) == f'KwDifferentMessageKey({repr(exp)})'
     assert isinstance(e, KwDifferentMessageKey)
     assert isinstance(e, Kwexception)
+

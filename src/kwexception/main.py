@@ -33,6 +33,10 @@ class Kwexception(Exception):
     NEW_CONVERT = True
     NEW_CONTEXT = True
 
+    # Key names for contextual information provided by new().
+    CONTEXT_ERROR = 'context_error'
+    CONTEXT_ARGS = 'context_args'
+
     # Whether to use the msg as format string or as a lookup
     # into a FORMATS dict of format strings.
     FORMAT_MSG = False
@@ -81,8 +85,9 @@ class Kwexception(Exception):
                 fmt = self.FORMATS.get(msg, msg)
             kws[self.MSG_KEY] = fmt.format(**kws)
 
-        # Add kws to xs so that it will be included in the super() call.
-        if self.ADD_PARAMS_TO_ARGS:
+        # Add kws to xs so that it will end up in self.args.
+        # But don't do that if kws is empty.
+        if self.ADD_PARAMS_TO_ARGS and kws:
             xs = xs + (kws,)
 
         # Set params and make the super() call.
@@ -114,10 +119,10 @@ class Kwexception(Exception):
         # Otherwise, return a new exception of type cls (optionally augmented
         # with contextual information about the original error).
         if cls.NEW_CONTEXT:
-            kws.update(
-                context_error = type(e).__name__,
-                context_args = e.args,
-            )
+            kws.update({
+                cls.CONTEXT_ERROR: type(e).__name__,
+                cls.CONTEXT_ARGS: e.args,
+            })
         return cls(**kws)
 
     def __str__(self):

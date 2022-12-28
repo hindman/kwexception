@@ -68,9 +68,9 @@ def path_for_test_func(func):
         sys.exit(f'Too many matching paths.\n{txt}')
 
 @task
-def bump(c, kind = 'minor', local = False):
+def bump(c, kind = 'minor', edit_only = False, push = False):
     '''
-    Version bump: minor unless --kind major|patch. Commits/pushes unless --local.
+    Version bump: minor|major|patch [--edit-only] [--push]
     '''
     # Validate.
     assert kind in ('major', 'minor', 'patch')
@@ -98,9 +98,10 @@ def bump(c, kind = 'minor', local = False):
         print(f'Bumped to {version}.')
 
     # Commit and push.
-    if not local:
+    if not edit_only:
         c.run(f"git commit {path} -m 'Version {version}'")
-        c.run('git push origin master')
+        if push:
+            c.run('git push origin master')
 
 @task
 def tox(c):

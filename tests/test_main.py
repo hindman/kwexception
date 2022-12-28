@@ -139,12 +139,12 @@ def test_construct_format_msg(tr):
     e = cls(**kws)
     do_custom_checks(e, exp_msg, exp_params)
 
-    # Set FORMAT_MSG and FORMATS. Now the user can just pass a FORMATS key
+    # Set FORMAT_MSG and MSGS. Now the user can just pass a MSGS key
     formats = dict(
         regular = 'Got {a} expected {b}',
         reverse = 'Expected {b} got {a}',
     )
-    cls = custom_kwex(FORMAT_MSG = True, FORMATS = formats)
+    cls = custom_kwex(FORMAT_MSG = True, MSGS = formats)
     for k in formats:
         exp_msg = formats[k].format(**kws)
         exp_params = {'msg': exp_msg, **kws}

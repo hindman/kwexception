@@ -7,22 +7,28 @@ class Kwexception(Exception):
     # Key name for the Kwexception message in self.params.
     MSG_KEY = 'msg'
 
-    # Specify a default msg for instances of the class.
-    DEFAULT_MSG = None
-
     # Whether and how to set msg from the first positional.
     MOVE = 'move'
     COPY = 'copy'
     SET_MSG = MOVE
 
+    # Default msg for instances of the class.
+    DEFAULT_MSG = None
+
+    # Default msg values for instances of the class. Accepts mapping or object.
+    MSGS = None
+
+    # Whether to use the initially-derived msg value as format string.
+    FORMAT_MSG = False
+
     # Whether to add params to args.
     ADD_PARAMS_TO_ARGS = True
 
-    # Whether to treat a single positional dict as the keyword params.
-    SINGLE_DICT_AS_PARAMS = True
-
     # Whether to simplify stringification for message-only exceptions.
     SIMPLIFY_DISPLAY = True
+
+    # Whether to treat a single positional dict as the keyword params.
+    SINGLE_DICT_AS_PARAMS = True
 
     # Whether new() should use update or setdefault when augmenting params.
     NEW_UPDATE = True
@@ -36,11 +42,6 @@ class Kwexception(Exception):
     # Key names for contextual information provided by new().
     CONTEXT_ERROR = 'context_error'
     CONTEXT_ARGS = 'context_args'
-
-    # Whether to use the msg as format string or as a lookup
-    # into a FORMATS dict of format strings.
-    FORMAT_MSG = False
-    FORMATS = None
 
     def __init__(self, *xs, **kws):
         # To remain faithful to repr(), if the constructor receives
@@ -75,14 +76,14 @@ class Kwexception(Exception):
             kws = d
 
         # Format the msg. If msg is a str (neither None nor an unusual value
-        # from user), first set fmt, either directly from msg or via FORMATS
+        # from user), first set fmt, either directly from msg or via MSGS
         # (where msg is key). Then set the msg in kws via a format() call.
         msg = kws.get(self.MSG_KEY, None)
         if self.FORMAT_MSG and isinstance(msg, str):
-            if self.FORMATS is None:
+            if self.MSGS is None:
                 fmt = msg
             else:
-                fmt = self.FORMATS.get(msg, msg)
+                fmt = self.MSGS.get(msg, msg)
             kws[self.MSG_KEY] = fmt.format(**kws)
 
         # Add kws to xs so that it will end up in self.args.

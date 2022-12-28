@@ -10,8 +10,11 @@ toc: Table of contents
 todos: TODOs
 --------
 
+Add MSGS, the equivalent of FORMATS.
+
 README.md: document new features.
     DEFAULT_MSG
+    MSGS
     FORMAT_MSG
     FORMATS
     CONTEXT_ERROR

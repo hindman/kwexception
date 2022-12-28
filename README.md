@@ -18,9 +18,9 @@ hoc string-formatting maneuvers. Ill-conceived because something explicit and
 useful to programmers (data) is wedged into a human-readable message, making
 the data less immediately accessible (for example, quickly copying it into an
 editor or REPL) and less explicit (sometimes important details are lost in
-stringification). Here's a lightly-edited example taken from a widely used
-Python library illustrating how the typical approach to exceptions can quickly
-lead to tedious string-building gynastics:
+stringification). Here's a lightly-edited example taken from a high quality,
+widely used Python library illustrating how the typical approach to exceptions
+can quickly lead to tedious string-building gynastics:
 
 ```python
 raise TypeError(
@@ -113,7 +113,21 @@ stacktraces, your project has bigger problems). For Python programmers, there
 is nothing mysterious or unsightly about a dict; they are eminently clear and
 beautifully practical.
 
-#### Details
+#### Setting a default message
+
+In many situations, it makes sense to use one message for each exception type.
+In that case, the `Kwexception` subclass can declare a `DEFAULT_MSG`, further
+simplifying the process of creating the exception.
+
+```python
+class PointError(Kwexception):
+    DEFAULT_MSG = 'Invalid Point coordinates'
+
+e = PointError(x = 11, y = None)
+print(e.params)  # {'msg': 'Invalid Point coordinates', 'x': 11, 'y': None}
+```
+
+#### Details on the exception data model on stringification
 
 The underlying data model for a [Python exception][python_base_exception] is a
 tuple, accessible via the `args` attribute.
@@ -166,11 +180,11 @@ print(repr(e3))  # PointError('Foo')
 
 #### Additional feature: exception handling and augmentation
 
-The `Kwexception` class provides one other primary feature: the ability to handle
+The `Kwexception` class provides another primary feature: the ability to handle
 other exceptions in an easier, more consistent way. This behavior is provided
 via the class method `new()`, which takes an exception as its first argument
-and optionally takes any other keyword parameters. Its primary intended usage
-is in a `try-except` context:
+and optionally takes any other keyword parameters. Its intended usage is in a
+`try-except` context:
 
 ```python
 try:
@@ -178,13 +192,13 @@ try:
     ...
 except Exception as e:
     # The original error might or might not be a PointError.
-    # This ensures that it is and augments its keyword parameters.
+    # Our application wants to ensure that it is.
     e = PointError.new(e, msg = 'foo', x = x, y = y)
     ...
 ```
 
-If the exception provided to `Kwexception.new()` is already an instance
-of a sublcass of `Kwexception`, the method returns the same exception, but
+If the exception provided to `Kwexception.new()` is already an instance of a
+sublcass of `Kwexception`, the method returns the same exception instance, but
 updates its `params` dict with the keyword parameters supplied to `new()`.
 
 ```python
@@ -208,6 +222,44 @@ print(repr(e3)) # PointError({'msg': 'bar', 'x': 1,
                 # 'context_error': 'ValueError', 'context_args': ('foo', 99)})
 ```
 
+#### Additional feature: data-bearing messages
+
+Perhaps you like the central idea of the kwexception library (maintaining a
+separation between the textual message and the data values), but either you are
+a traditionalist at heart or your project still requires data-bearing,
+human-readable messages for some other purpose (for example, a situation where
+you do need to assemble a user-facing message, not a stacktrace, and an
+exception's data provides the most logical mechanism to do that).
+
+The kwexception library supports that use case via the `FORMAT_MSG` attribute.
+If true, the `Kwexception` subclass will treat the provided `msg` not as a
+literal message by as a Python format-string. When creating a new exception
+instance it will create the actual message via a `str.format()` call, passing
+the exception's keyword parameters as arguments to that call.
+
+```python
+class PointError(Kwexception):
+    FORMAT_MSG = True
+
+INVALID_FMT = 'Invalid Point coordinates: x={x} y={y}'
+
+e = PointError(INVALID_FMT, x = 11, y = None)
+print(e.msg)     # Invalid Point coordinates: x=11 y=None
+print(e.params)  # {'msg': 'Invalid Point coordinates: x=11 y=None', 'x': 11, 'y': None}
+```
+
+That feature can be combined with `DEFAULT_MSG`, in which the default message
+serves as a default format-string.
+
+```python
+class PointError(Kwexception):
+    DEFAULT_MSG = 'Invalid Point coordinates: x={x} y={y}'
+    FORMAT_MSG = True
+
+e = PointError(x = 11, y = None)
+print(e.msg)     # Same as previous example.
+print(e.params)
+```
 #### Customization
 
 A `Kwexception` superclass offers a few customizations for users who want some,

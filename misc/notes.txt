@@ -10,8 +10,6 @@ toc: Table of contents
 todos: TODOs
 --------
 
-Implement getattr() support for MSGS, and write a test.
-
 README: quick scan on Github.
 
 Version bump.

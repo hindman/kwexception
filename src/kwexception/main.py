@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 
 class Kwexception(Exception):
     '''
@@ -82,8 +83,10 @@ class Kwexception(Exception):
         if self.FORMAT_MSG and isinstance(msg, str):
             if self.MSGS is None:
                 fmt = msg
-            else:
+            elif isinstance(self.MSGS, Mapping):
                 fmt = self.MSGS[msg]
+            else:
+                fmt = getattr(self.MSGS, msg)
             kws[self.MSG_KEY] = fmt.format(**kws)
 
         # Add kws to xs so that it will end up in self.args.

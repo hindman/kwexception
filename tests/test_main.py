@@ -1,4 +1,5 @@
 import pytest
+from types import SimpleNamespace
 
 from kwexception import Kwexception, __version__
 
@@ -154,7 +155,7 @@ def test_construct_format_msg(tr):
         e = cls(k, **kws)
         do_custom_checks(e, exp_msg, exp_params)
 
-    # But if the user supplies an invalid MSGS key, they will
+    # If the user supplies an invalid MSGS key, they will
     # get a KeyError from Python.
     bad_key = 'fubb'
     with pytest.raises(KeyError) as einfo:
@@ -167,6 +168,15 @@ def test_construct_format_msg(tr):
     with pytest.raises(KeyError) as einfo:
         e = cls(k, a = 1)
     assert repr(einfo.value) == f"KeyError({missing_key!r})"
+
+    # If the user supplies an invalid MSGS attribute, they will
+    # get an AttributeError from Python.
+    bad_key = 'fubb'
+    formats = SimpleNamespace(**formats)
+    cls = custom_kwex(FORMAT_MSG = True, MSGS = formats)
+    with pytest.raises(AttributeError) as einfo:
+        e = cls(bad_key, **kws)
+    assert bad_key in repr(einfo.value)
 
 def test_different_message_name(tr):
     # The user switches msg to message.

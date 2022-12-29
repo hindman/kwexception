@@ -10,11 +10,7 @@ toc: Table of contents
 todos: TODOs
 --------
 
-README: quick scan on Github.
-
-Version bump.
-
-Publish.
+...
 
 --------
 dev-notes: Dev notes

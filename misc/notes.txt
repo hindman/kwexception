@@ -10,7 +10,7 @@ toc: Table of contents
 todos: TODOs
 --------
 
-Final editing pass.
+README: Final editing pass.
 
 Version bump.
 

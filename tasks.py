@@ -12,7 +12,7 @@
 #   inv test [--cov]
 #   inv tox
 #   inv bump [--kind <major|minor|patch>] [--local]
-#   # inv dist [--publish] [--test]
+#   inv dist [--publish] [--test]
 #
 ####
 

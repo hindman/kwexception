@@ -60,12 +60,22 @@ def do_custom_checks(e, msg, params, **kws):
 ####
 
 def test_construct_default(tr):
+    # Default behavior.
     kws = dict(a = 1, b = 2)
     exp_params = dict(msg = MSG, **kws)
     e = KwDefault(MSG, **kws)
     do_checks(e, MSG, exp_params)
 
+def test_construct_message_only(tr):
+    # Default behavior for a message-only Kwexception.
+    e = KwDefault(MSG)
+    exp_params = {'msg': MSG}
+    do_checks(e, MSG, exp_params, skip_str = True)
+    assert str(e) == MSG
+    assert repr(e) == f'{DEFAULT_CLS_NAME}({MSG!r})'
+
 def test_construct_just_dict(tr):
+    # Checks behavior when the only arg/param is a positional dict.
 
     # Basic use case: user intends for the keyword params
     # to be the Kwexception params, and they include a msg.
@@ -75,7 +85,7 @@ def test_construct_just_dict(tr):
 
     # Reasonable use case, albeit one that doesn't take direct advantage of
     # Kwexception behaviors. User wants a single dict to be the args, not the
-    # params, so they disable SET_MSG.
+    # params, so they disable SINGLE_DICT_AS_PARAMS and SET_MSG.
     d = dict(x = 1, y = 2)
     cls = custom_kwex(
         SINGLE_DICT_AS_PARAMS = False,
@@ -96,13 +106,6 @@ def test_construct_just_dict(tr):
     do_custom_checks(e, exp_msg, exp_params, skip_str = True)
     assert str(e) == str(kws)
     assert repr(e) == f'{CUSTOM_CLS_NAME}({kws})'
-
-def test_construct_simple(tr):
-    e = KwDefault(MSG)
-    exp_params = {'msg': MSG}
-    do_checks(e, MSG, exp_params, skip_str = True)
-    assert str(e) == MSG
-    assert repr(e) == f'{DEFAULT_CLS_NAME}({MSG!r})'
 
 def test_construct_default_msg(tr):
     # Some params and the default msg of the subclass.
@@ -151,7 +154,22 @@ def test_construct_format_msg(tr):
         e = cls(k, **kws)
         do_custom_checks(e, exp_msg, exp_params)
 
+    # But if the user supplies an invalid MSGS key, they will
+    # get a KeyError from Python.
+    bad_key = 'fubb'
+    with pytest.raises(KeyError) as einfo:
+        e = cls(bad_key, **kws)
+    assert repr(einfo.value) == f"KeyError({bad_key!r})"
+
+    # Or if the user fails to supply the params needed by the
+    # relevant format string, they will get a KeyError from Python.
+    missing_key = 'b'
+    with pytest.raises(KeyError) as einfo:
+        e = cls(k, a = 1)
+    assert repr(einfo.value) == f"KeyError({missing_key!r})"
+
 def test_different_message_name(tr):
+    # The user switches msg to message.
     kws = dict(a = 1, b = 2)
     exp_params = dict(message = MSG, **kws)
     msg_key = 'message'
@@ -167,6 +185,9 @@ def test_different_message_name(tr):
 ####
 
 def test_default_new(tr):
+    # Checks (mostly) default behavior for Kwexception.new().
+
+    # Some params.
     kws = dict(a = 1, b = 2)
     extra = dict(c = 33, d = 44)
 
@@ -207,6 +228,7 @@ def test_default_new(tr):
     assert e2.params == exp
 
 def test_new_no_convert(tr):
+    # Checks Kwexception.new() without conversion.
     cls = custom_kwex(NEW_CONVERT = False)
     e1 = ValueError(MSG)
     e2 = cls.new(e1, a = 1)
@@ -214,7 +236,10 @@ def test_new_no_convert(tr):
     assert e2 is e1
     assert e2.args == prev
 
-def test_new_no_update(tr):
+def test_new_no_update_or_context(tr):
+    # Checks Kwexception.new() without conversion or context.
+
+    # Params and a cls to use.
     kws = dict(a = 1, b = 2)
     extra = dict(c = 33, d = 44)
     exp = dict(msg = MSG, **kws)
@@ -223,11 +248,13 @@ def test_new_no_update(tr):
         NEW_CONTEXT = False,
     )
 
+    # Original error is a Kwexception.
     e1 = cls(MSG, **kws)
     e2 = cls.new(e1, **extra, a = -1)
     assert e2 is e1
     assert e2.params == {**exp, **extra}
 
+    # Original error is something else.
     e1 = ValueError(MSG)
     e2 = cls.new(e1, **extra)
     assert e2 is not e1

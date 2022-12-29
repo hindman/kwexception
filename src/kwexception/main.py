@@ -44,7 +44,7 @@ class Kwexception(Exception):
     CONTEXT_ARGS = 'context_args'
 
     def __init__(self, *xs, **kws):
-        # To remain faithful to repr(), if the constructor receives
+        # To remain faithful to repr(), if the initializer receives
         # only a dict positionally, treat it as the params.
         xs_is_params = (
             self.SINGLE_DICT_AS_PARAMS and
@@ -83,7 +83,7 @@ class Kwexception(Exception):
             if self.MSGS is None:
                 fmt = msg
             else:
-                fmt = self.MSGS.get(msg, msg)
+                fmt = self.MSGS[msg]
             kws[self.MSG_KEY] = fmt.format(**kws)
 
         # Add kws to xs so that it will end up in self.args.

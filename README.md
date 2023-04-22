@@ -111,7 +111,7 @@ PointError: {'msg': 'Invalid Point coordinates', 'x': 11, 'y': None}
 Upon first exposure to such output one might balk at the aesthetics of the dict
 when compared to a classic exception with just a human-readable message. But
 stacktraces – and exception stringification generally – are the domain of
-software engineers, not end users, so those aesthetics concerns are misplaced
+software engineers, not end users, so those aesthetic concerns are misplaced
 (if your end-users are seeing your stacktraces, your project has bigger
 problems). For Python programmers, there is nothing mysterious or unsightly
 about a dict; they are eminently clear and beautifully practical.
@@ -171,7 +171,7 @@ e = PointError(x = 11, y = None)
 print(e.params)  # {'msg': 'Invalid Point coordinates: x=11 y=None', 'x': 11, 'y': None}
 ```
 
-#### Details on the exception data model on stringification
+#### Details on the exception data model and stringification
 
 The underlying data model for a [Python exception][python_base_exception] is a
 tuple, accessible via the `args` attribute.

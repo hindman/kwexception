@@ -62,3 +62,11 @@ Tag file creation:
 
     inv tags
 
+Python versions to support:
+
+    Although I did learn how to configure Github workflows to run earlier
+    Pythons, I decided to support Python 3.7 and higher. Python added f-strings
+    in 3.6 and I don't really want to abandon those. Since 3.6 is already
+    marked end-of-life, I opted to keep things simple and just support 3.7+,
+    which can be exercised on ubuntu-latest.
+
